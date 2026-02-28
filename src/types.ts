@@ -2,15 +2,16 @@ export type TransactionType = 'expense' | 'income';
 
 export interface Transaction {
   id: string;
-  type: TransactionType;
+  type: 'expense' | 'income';
   amount: number;
   category: string;
   categoryIcon: string;
   categoryColor: string;
-  date: string;
-  account: string;
+  date: string;       // Date in YYYY-MM-DD
+  time: string;       // Original field matching date
+  account: string;    // Name of account
+  account_id?: string; // Foreign key back to account id
   note: string;
-  time: string;
 }
 
 export interface Account {

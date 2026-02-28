@@ -39,6 +39,7 @@ CREATE TABLE IF NOT EXISTS transactions (
   category_color TEXT DEFAULT '',
   date TEXT DEFAULT '',
   account TEXT DEFAULT '',
+  account_id UUID REFERENCES accounts(id) ON DELETE SET NULL,
   note TEXT DEFAULT '',
   created_at TIMESTAMPTZ DEFAULT now()
 );
@@ -140,32 +141,32 @@ BEGIN
   IF TG_OP = 'INSERT' THEN
     -- 新增记录: 支出减余额，收入加余额
     IF NEW.type = 'expense' THEN
-      UPDATE public.accounts SET balance = balance - NEW.amount WHERE user_id = NEW.user_id AND (name = NEW.account OR name_en = NEW.account);
+      UPDATE public.accounts SET balance = balance - NEW.amount WHERE id = NEW.account_id;
     ELSIF NEW.type = 'income' THEN
-      UPDATE public.accounts SET balance = balance + NEW.amount WHERE user_id = NEW.user_id AND (name = NEW.account OR name_en = NEW.account);
+      UPDATE public.accounts SET balance = balance + NEW.amount WHERE id = NEW.account_id;
     END IF;
     RETURN NEW;
   ELSIF TG_OP = 'DELETE' THEN
     -- 删除记录: 反向操作
     IF OLD.type = 'expense' THEN
-      UPDATE public.accounts SET balance = balance + OLD.amount WHERE user_id = OLD.user_id AND (name = OLD.account OR name_en = OLD.account);
+      UPDATE public.accounts SET balance = balance + OLD.amount WHERE id = OLD.account_id;
     ELSIF OLD.type = 'income' THEN
-      UPDATE public.accounts SET balance = balance - OLD.amount WHERE user_id = OLD.user_id AND (name = OLD.account OR name_en = OLD.account);
+      UPDATE public.accounts SET balance = balance - OLD.amount WHERE id = OLD.account_id;
     END IF;
     RETURN OLD;
   ELSIF TG_OP = 'UPDATE' THEN
     -- 修改记录: 先撤销旧的，再应用新的
     -- 1. 撤销旧的
     IF OLD.type = 'expense' THEN
-      UPDATE public.accounts SET balance = balance + OLD.amount WHERE user_id = OLD.user_id AND (name = OLD.account OR name_en = OLD.account);
+      UPDATE public.accounts SET balance = balance + OLD.amount WHERE id = OLD.account_id;
     ELSIF OLD.type = 'income' THEN
-      UPDATE public.accounts SET balance = balance - OLD.amount WHERE user_id = OLD.user_id AND (name = OLD.account OR name_en = OLD.account);
+      UPDATE public.accounts SET balance = balance - OLD.amount WHERE id = OLD.account_id;
     END IF;
     -- 2. 应用新的
     IF NEW.type = 'expense' THEN
-      UPDATE public.accounts SET balance = balance - NEW.amount WHERE user_id = NEW.user_id AND (name = NEW.account OR name_en = NEW.account);
+      UPDATE public.accounts SET balance = balance - NEW.amount WHERE id = NEW.account_id;
     ELSIF NEW.type = 'income' THEN
-      UPDATE public.accounts SET balance = balance + NEW.amount WHERE user_id = NEW.user_id AND (name = NEW.account OR name_en = NEW.account);
+      UPDATE public.accounts SET balance = balance + NEW.amount WHERE id = NEW.account_id;
     END IF;
     RETURN NEW;
   END IF;

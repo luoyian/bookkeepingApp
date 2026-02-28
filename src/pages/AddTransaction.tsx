@@ -70,6 +70,7 @@ export const AddTransaction: React.FC<AddTransactionProps> = ({ onClose, languag
       categoryIcon,
       categoryColor,
       account: language === 'zh' ? selectedAccount.name : selectedAccount.nameEn,
+      account_id: selectedAccount.id,
       time: date,
       note
     });
@@ -232,8 +233,8 @@ export const AddTransaction: React.FC<AddTransactionProps> = ({ onClose, languag
               key={key}
               onClick={() => handleKeyClick(key)}
               className={`h-14 flex items-center justify-center text-xl font-medium transition-colors ${key === 'done' ? 'bg-primary text-white' :
-                  ['backspace', '+', '-', 'OK'].includes(key) ? 'bg-slate-50 dark:bg-slate-800 text-slate-600 dark:text-slate-400' :
-                    'bg-white dark:bg-slate-700 text-slate-900 dark:text-white active:bg-slate-50 dark:active:bg-slate-600'
+                ['backspace', '+', '-', 'OK'].includes(key) ? 'bg-slate-50 dark:bg-slate-800 text-slate-600 dark:text-slate-400' :
+                  'bg-white dark:bg-slate-700 text-slate-900 dark:text-white active:bg-slate-50 dark:active:bg-slate-600'
                 }`}
             >
               {key === 'backspace' ? <span className="material-symbols-outlined">backspace</span> :

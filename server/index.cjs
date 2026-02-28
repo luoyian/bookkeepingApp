@@ -256,7 +256,7 @@ app.get('/api/transactions', authMiddleware, async (req, res) => {
 
 // POST /api/transactions
 app.post('/api/transactions', authMiddleware, async (req, res) => {
-    const { type, amount, category, categoryIcon, categoryColor, date, account, note } = req.body;
+    const { type, amount, category, categoryIcon, categoryColor, date, account, account_id, note } = req.body;
 
     const { data, error } = await req.supabaseClient
         .from('transactions')
@@ -269,6 +269,7 @@ app.post('/api/transactions', authMiddleware, async (req, res) => {
             category,
             date: date || new Date().toISOString().split('T')[0],
             account: account || '',
+            account_id: account_id || null,
             note: note || '',
         })
         .select()
@@ -284,7 +285,7 @@ app.post('/api/transactions', authMiddleware, async (req, res) => {
 // PUT /api/transactions/:id
 app.put('/api/transactions/:id', authMiddleware, async (req, res) => {
     const { id } = req.params;
-    const { type, amount, category, categoryIcon, categoryColor, date, account, note } = req.body;
+    const { type, amount, category, categoryIcon, categoryColor, date, account, account_id, note } = req.body;
 
     const { data, error } = await req.supabaseClient
         .from('transactions')
@@ -296,6 +297,7 @@ app.put('/api/transactions/:id', authMiddleware, async (req, res) => {
             category_color: categoryColor,
             date,
             account,
+            account_id,
             note,
         })
         .eq('id', id)
@@ -356,6 +358,7 @@ function transformTransaction(row) {
         date: row.date,
         time: row.date,
         account: row.account,
+        account_id: row.account_id,
         note: row.note,
     };
 }
