@@ -175,6 +175,7 @@ export interface TransactionData {
     date: string;
     time: string;
     account: string;
+    account_id?: string;
     note: string;
 }
 
