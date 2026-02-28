@@ -211,10 +211,17 @@ function transformTransaction(row) {
 }
 
 // =============================================================
-// Start Server
+// Start Server / Export for Serverless
 // =============================================================
 
-app.listen(PORT, () => {
-    console.log(`🚀 记账APP 后端服务已启动: http://localhost:${PORT}`);
-    console.log(`📡 API Base URL: http://localhost:${PORT}/api`);
-});
+// Default export is required by Vercel Serverless Functions
+export default app;
+
+// Only start the server if not running in a serverless environment (like Vercel)
+// Vercel handles the server listening process itself when exporting `app`
+if (process.env.NODE_ENV !== 'production' || process.env.VERCEL_ENV === undefined) {
+    app.listen(PORT, () => {
+        console.log(`🚀 记账APP 后端服务已启动: http://localhost:${PORT}`);
+        console.log(`📡 API Base URL: http://localhost:${PORT}/api`);
+    });
+}
