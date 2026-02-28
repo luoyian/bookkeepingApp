@@ -12,16 +12,21 @@ interface AssetsProps {
   onToggleVisibility: () => void;
 }
 
-export const Assets: React.FC<AssetsProps> = ({ 
-  accounts, 
-  language, 
-  onAddAccount, 
+export const Assets: React.FC<AssetsProps> = ({
+  accounts,
+  language,
+  onAddAccount,
   onEditAccount,
   isAmountVisible,
   onToggleVisibility
 }) => {
-  const totalAssets = accounts.reduce((acc, curr) => acc + curr.balance, 0);
-  const totalLiabilities = 6700;
+  const totalAssets = accounts
+    .filter(acc => acc.balance > 0)
+    .reduce((acc, curr) => acc + curr.balance, 0);
+
+  const totalLiabilities = accounts
+    .filter(acc => acc.balance < 0)
+    .reduce((acc, curr) => acc + Math.abs(curr.balance), 0);
 
   const formatAmount = (amount: number) => {
     if (!isAmountVisible) return '****';
@@ -70,12 +75,12 @@ export const Assets: React.FC<AssetsProps> = ({
         </div>
         <div className="space-y-3">
           {accounts.map((acc) => (
-            <div 
-              key={acc.id} 
+            <div
+              key={acc.id}
               onClick={() => onEditAccount(acc)}
               className="flex items-center gap-4 bg-white dark:bg-slate-900 p-4 rounded-2xl shadow-sm border border-slate-50 dark:border-slate-800 cursor-pointer active:scale-[0.98] transition-all"
             >
-              <div 
+              <div
                 className="flex items-center justify-center rounded-full shrink-0 size-11"
                 style={{ backgroundColor: `${acc.color}20`, color: acc.color }}
               >
@@ -101,8 +106,8 @@ export const Assets: React.FC<AssetsProps> = ({
               </div>
             </div>
           ))}
-          
-          <button 
+
+          <button
             onClick={onAddAccount}
             className="w-full mt-6 py-4 flex flex-col items-center justify-center gap-1 rounded-2xl border-2 border-dashed border-slate-300 dark:border-white/10 text-slate-500 dark:text-slate-400 active:scale-95 transition-transform bg-transparent"
           >
