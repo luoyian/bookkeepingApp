@@ -4,9 +4,9 @@ import dotenv from 'dotenv';
 import path from 'path';
 import { fileURLToPath } from 'url';
 console.log('--- 调试开始 ---');
-console.log('URL:', process.env.SUPABASE_URL);
-console.log('KEY 内容:', JSON.stringify(process.env.SUPABASE_ANON_KEY));
-console.log('KEY 长度:', process.env.SUPABASE_ANON_KEY ? process.env.SUPABASE_ANON_KEY.length : '未定义');
+console.log('URL:', process.env.VITE_SUPABASE_URL);
+console.log('KEY 内容:', JSON.stringify(process.env.VITE_SUPABASE_ANON_KEY));
+console.log('KEY 长度:', process.env.VITE_SUPABASE_ANON_KEY ? process.env.VITE_SUPABASE_ANON_KEY.length : '未定义');
 console.log('--- 调试结束 ---');
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const rootDir = path.resolve(__dirname, '..');
@@ -15,16 +15,16 @@ const rootDir = path.resolve(__dirname, '..');
 dotenv.config({ path: path.resolve(rootDir, '.env.local') });
 dotenv.config({ path: path.resolve(rootDir, '.env') });
 
-const supabaseUrl = process.env.SUPABASE_URL || '';
-const supabaseAnonKey = process.env.SUPABASE_ANON_KEY || '';
+const supabaseUrl = process.env.VITE_SUPABASE_URL || '';
+const supabaseAnonKey = process.env.VITE_SUPABASE_ANON_KEY || '';
 
 if (!supabaseUrl || !supabaseAnonKey) {
-    console.warn('⚠️  SUPABASE_URL or SUPABASE_ANON_KEY is not set. Check your .env file.');
+    console.warn('⚠️  VITE_SUPABASE_URL or VITE_SUPABASE_ANON_KEY is not set. Check your .env file.');
 }
 
 export const supabase = createClient(supabaseUrl, supabaseAnonKey);
-console.log('URL:', process.env.SUPABASE_URL);
-console.log('Key Length:', process.env.SUPABASE_ANON_KEY?.length);
+console.log('URL:', process.env.VITE_SUPABASE_URL);
+console.log('Key Length:', process.env.VITE_SUPABASE_ANON_KEY?.length);
 export function createSupabaseClient(accessToken) {
     return createClient(supabaseUrl, supabaseAnonKey, {
         global: {
