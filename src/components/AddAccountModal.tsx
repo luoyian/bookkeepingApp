@@ -6,11 +6,12 @@ import { t } from '../i18n';
 interface AddAccountModalProps {
   language: Language;
   onSave: (account: Account) => void;
+  onDelete?: () => void;
   onClose: () => void;
   initialData?: Account;
 }
 
-export const AddAccountModal: React.FC<AddAccountModalProps> = ({ language, onSave, onClose, initialData }) => {
+export const AddAccountModal: React.FC<AddAccountModalProps> = ({ language, onSave, onDelete, onClose, initialData }) => {
   const [name, setName] = useState(initialData?.name || '');
   const [nameEn, setNameEn] = useState(initialData?.nameEn || '');
   const [balance, setBalance] = useState(initialData?.balance.toString() || '');
@@ -76,12 +77,12 @@ export const AddAccountModal: React.FC<AddAccountModalProps> = ({ language, onSa
             <span className="material-symbols-outlined">close</span>
           </button>
         </div>
-        
+
         <div className="p-6 space-y-4 max-h-[70vh] overflow-y-auto no-scrollbar">
           <div className="space-y-2">
             <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">{t('name', language)} (ZH)</label>
-            <input 
-              type="text" 
+            <input
+              type="text"
               value={name}
               onChange={(e) => setName(e.target.value)}
               className="w-full bg-slate-50 dark:bg-slate-800 border-none rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-primary/20"
@@ -91,8 +92,8 @@ export const AddAccountModal: React.FC<AddAccountModalProps> = ({ language, onSa
 
           <div className="space-y-2">
             <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">{t('name', language)} (EN)</label>
-            <input 
-              type="text" 
+            <input
+              type="text"
               value={nameEn}
               onChange={(e) => setNameEn(e.target.value)}
               className="w-full bg-slate-50 dark:bg-slate-800 border-none rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-primary/20"
@@ -102,8 +103,8 @@ export const AddAccountModal: React.FC<AddAccountModalProps> = ({ language, onSa
 
           <div className="space-y-2">
             <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">{t('amount', language)}</label>
-            <input 
-              type="number" 
+            <input
+              type="number"
               value={balance}
               onChange={(e) => setBalance(e.target.value)}
               className="w-full bg-slate-50 dark:bg-slate-800 border-none rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-primary/20"
@@ -121,7 +122,7 @@ export const AddAccountModal: React.FC<AddAccountModalProps> = ({ language, onSa
             </div>
             <div className="grid grid-cols-4 gap-2">
               {icons.map(i => (
-                <button 
+                <button
                   key={i}
                   onClick={() => setIcon(i)}
                   className={`size-10 rounded-lg flex items-center justify-center transition-all ${icon === i ? 'bg-primary text-white scale-110' : 'bg-slate-100 dark:bg-slate-800 text-slate-400'}`}
@@ -136,8 +137,8 @@ export const AddAccountModal: React.FC<AddAccountModalProps> = ({ language, onSa
             <div className="flex items-center justify-between">
               <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">颜色 Color</label>
               <div className="relative">
-                <input 
-                  type="color" 
+                <input
+                  type="color"
                   id="customColor"
                   className="absolute inset-0 opacity-0 cursor-pointer w-full h-full"
                   value={colors.includes(color) ? '#000000' : color}
@@ -150,7 +151,7 @@ export const AddAccountModal: React.FC<AddAccountModalProps> = ({ language, onSa
             </div>
             <div className="grid grid-cols-6 gap-2">
               {colors.map(c => (
-                <button 
+                <button
                   key={c}
                   onClick={() => setColor(c)}
                   className={`h-8 rounded-lg transition-all border-2 ${color === c ? 'border-primary scale-110' : 'border-transparent'}`}
@@ -159,8 +160,8 @@ export const AddAccountModal: React.FC<AddAccountModalProps> = ({ language, onSa
                 </button>
               ))}
               {!colors.includes(color) && (
-                <button 
-                  onClick={() => {}}
+                <button
+                  onClick={() => { }}
                   className="h-8 rounded-lg transition-all border-2 border-primary scale-110"
                   style={{ backgroundColor: color }}
                 >
@@ -170,14 +171,30 @@ export const AddAccountModal: React.FC<AddAccountModalProps> = ({ language, onSa
           </div>
         </div>
 
+        {initialData && onDelete && (
+          <div className="px-6 pb-2 pt-4">
+            <button
+              onClick={() => {
+                if (window.confirm(language === 'zh' ? '确定要注销/删除此账户吗？' : 'Are you sure you want to delete this account?')) {
+                  onDelete();
+                  onClose();
+                }
+              }}
+              className="w-full py-3 bg-rose-50 dark:bg-rose-900/10 text-rose-500 font-bold rounded-xl border border-rose-100 dark:border-rose-900/30 active:bg-rose-100 transition-colors"
+            >
+              {language === 'zh' ? '删除此账户' : 'Delete Account'}
+            </button>
+          </div>
+        )}
+
         <div className="p-6 bg-slate-50 dark:bg-slate-800/50 flex gap-3">
-          <button 
+          <button
             onClick={onClose}
             className="flex-1 py-3 rounded-xl font-bold text-sm text-slate-500 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700"
           >
             {t('cancel', language)}
           </button>
-          <button 
+          <button
             onClick={handleSave}
             className="flex-1 py-3 rounded-xl font-bold text-sm text-white bg-primary shadow-lg shadow-primary/20"
           >

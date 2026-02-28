@@ -9,10 +9,11 @@ interface AddTransactionProps {
   language: Language;
   accounts: Account[];
   onAdd: (tx: any) => void;
+  onDelete?: () => void;
   initialData?: Transaction;
 }
 
-export const AddTransaction: React.FC<AddTransactionProps> = ({ onClose, language, accounts, onAdd, initialData }) => {
+export const AddTransaction: React.FC<AddTransactionProps> = ({ onClose, language, accounts, onAdd, onDelete, initialData }) => {
   const [amount, setAmount] = useState(initialData ? initialData.amount.toString() : '0.00');
   const [type, setType] = useState<'expense' | 'income'>(initialData ? initialData.type : 'expense');
   const [selectedCategoryId, setSelectedCategoryId] = useState(() => {
@@ -137,7 +138,7 @@ export const AddTransaction: React.FC<AddTransactionProps> = ({ onClose, languag
                 onClick={() => cat.id === 'more' ? setShowCustomCategory(true) : setSelectedCategoryId(cat.id)}
                 className={`flex flex-col items-center gap-1.5 transition-opacity ${selectedCategoryId === cat.id ? 'opacity-100' : 'opacity-60'}`}
               >
-                <div 
+                <div
                   className={`w-12 h-12 rounded-full flex items-center justify-center text-white transition-transform ${selectedCategoryId === cat.id ? 'scale-110 shadow-lg' : ''}`}
                   style={{ backgroundColor: selectedCategoryId === cat.id ? cat.color : '#e2e8f0' }}
                 >
@@ -150,7 +151,7 @@ export const AddTransaction: React.FC<AddTransactionProps> = ({ onClose, languag
             ))}
             {selectedCategoryId === 'more' && customCategoryName && (
               <div className="flex flex-col items-center gap-1.5 opacity-100">
-                <div 
+                <div
                   className="w-12 h-12 rounded-full flex items-center justify-center text-white scale-110 shadow-lg overflow-hidden bg-slate-400"
                 >
                   {customCategoryIcon ? (
@@ -173,14 +174,14 @@ export const AddTransaction: React.FC<AddTransactionProps> = ({ onClose, languag
             <div className="flex-1">
               <div className="text-[13px] font-bold">{t('date', language)}</div>
             </div>
-            <input 
-              type="date" 
+            <input
+              type="date"
               value={date}
               onChange={(e) => setDate(e.target.value)}
               className="bg-transparent border-none text-[14px] font-medium p-0 focus:ring-0 text-right"
             />
           </div>
-          <div 
+          <div
             onClick={() => setShowAccountPicker(true)}
             className="flex items-center px-4 py-3 border-b border-slate-100 dark:border-slate-800 cursor-pointer active:bg-slate-50 dark:active:bg-slate-800"
           >
@@ -196,16 +197,32 @@ export const AddTransaction: React.FC<AddTransactionProps> = ({ onClose, languag
           <div className="flex items-center px-4 py-3">
             <span className="material-symbols-outlined text-slate-400 text-[20px] w-8">notes</span>
             <div className="flex-1">
-              <input 
-                className="w-full bg-transparent border-none p-0 text-[14px] focus:ring-0 placeholder-slate-400" 
-                placeholder={t('addNote', language)} 
-                type="text" 
+              <input
+                className="w-full bg-transparent border-none p-0 text-[14px] focus:ring-0 placeholder-slate-400"
+                placeholder={t('addNote', language)}
+                type="text"
                 value={note}
                 onChange={(e) => setNote(e.target.value)}
               />
             </div>
           </div>
         </div>
+
+        {initialData && onDelete && (
+          <div className="mx-4 mt-6">
+            <button
+              onClick={() => {
+                if (window.confirm(language === 'zh' ? '确定要删除此笔账单吗？' : 'Are you sure you want to delete this transaction?')) {
+                  onDelete();
+                  onClose();
+                }
+              }}
+              className="w-full py-3 bg-rose-50 dark:bg-rose-900/10 text-rose-500 font-bold rounded-xl border border-rose-100 dark:border-rose-900/30"
+            >
+              {language === 'zh' ? '删除此笔账单' : 'Delete Transaction'}
+            </button>
+          </div>
+        )}
       </main>
 
       <div className="absolute bottom-0 left-0 right-0 bg-slate-100 dark:bg-slate-900 border-t border-slate-200 dark:border-slate-800 pb-safe">
@@ -214,15 +231,14 @@ export const AddTransaction: React.FC<AddTransactionProps> = ({ onClose, languag
             <button
               key={key}
               onClick={() => handleKeyClick(key)}
-              className={`h-14 flex items-center justify-center text-xl font-medium transition-colors ${
-                key === 'done' ? 'bg-primary text-white' : 
-                ['backspace', '+', '-', 'OK'].includes(key) ? 'bg-slate-50 dark:bg-slate-800 text-slate-600 dark:text-slate-400' : 
-                'bg-white dark:bg-slate-700 text-slate-900 dark:text-white active:bg-slate-50 dark:active:bg-slate-600'
-              }`}
+              className={`h-14 flex items-center justify-center text-xl font-medium transition-colors ${key === 'done' ? 'bg-primary text-white' :
+                  ['backspace', '+', '-', 'OK'].includes(key) ? 'bg-slate-50 dark:bg-slate-800 text-slate-600 dark:text-slate-400' :
+                    'bg-white dark:bg-slate-700 text-slate-900 dark:text-white active:bg-slate-50 dark:active:bg-slate-600'
+                }`}
             >
-              {key === 'backspace' ? <span className="material-symbols-outlined">backspace</span> : 
-               key === 'done' ? <span className="material-symbols-outlined font-bold">done</span> : 
-               key}
+              {key === 'backspace' ? <span className="material-symbols-outlined">backspace</span> :
+                key === 'done' ? <span className="material-symbols-outlined font-bold">done</span> :
+                  key}
             </button>
           ))}
         </div>
@@ -230,14 +246,14 @@ export const AddTransaction: React.FC<AddTransactionProps> = ({ onClose, languag
 
       <AnimatePresence>
         {showAccountPicker && (
-          <motion.div 
+          <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             className="fixed inset-0 z-[60] bg-black/60 backdrop-blur-sm flex items-end justify-center"
             onClick={() => setShowAccountPicker(false)}
           >
-            <motion.div 
+            <motion.div
               initial={{ y: '100%' }}
               animate={{ y: 0 }}
               exit={{ y: '100%' }}
@@ -252,7 +268,7 @@ export const AddTransaction: React.FC<AddTransactionProps> = ({ onClose, languag
               </div>
               <div className="space-y-3 max-h-[40vh] overflow-y-auto no-scrollbar">
                 {accounts.map(acc => (
-                  <button 
+                  <button
                     key={acc.id}
                     onClick={() => {
                       setSelectedAccount(acc);
@@ -272,14 +288,14 @@ export const AddTransaction: React.FC<AddTransactionProps> = ({ onClose, languag
         )}
 
         {showCustomCategory && (
-          <motion.div 
+          <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             className="fixed inset-0 z-[60] bg-black/60 backdrop-blur-sm flex items-center justify-center p-6"
             onClick={() => setShowCustomCategory(false)}
           >
-            <motion.div 
+            <motion.div
               initial={{ scale: 0.9, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.9, opacity: 0 }}
@@ -310,8 +326,8 @@ export const AddTransaction: React.FC<AddTransactionProps> = ({ onClose, languag
 
                 <div className="space-y-2">
                   <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{language === 'zh' ? '分类名称 (最多两个字)' : 'Category Name'}</label>
-                  <input 
-                    type="text" 
+                  <input
+                    type="text"
                     maxLength={2}
                     value={customCategoryName}
                     onChange={(e) => setCustomCategoryName(e.target.value)}
@@ -321,7 +337,7 @@ export const AddTransaction: React.FC<AddTransactionProps> = ({ onClose, languag
                 </div>
               </div>
 
-              <button 
+              <button
                 onClick={() => {
                   if (customCategoryName) {
                     setSelectedCategoryId('more');

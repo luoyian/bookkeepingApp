@@ -21,6 +21,8 @@ import {
   apiGetTransactions,
   apiCreateTransaction,
   apiUpdateTransaction,
+  apiDeleteTransaction,
+  apiDeleteAccount,
   apiLogout,
   clearToken,
 } from './services/api';
@@ -163,11 +165,34 @@ export default function App() {
     try {
       const updated = await apiUpdateTransaction(updatedTx.id, updatedTx);
       setTransactions(prev => prev.map(tx => tx.id === updated.id ? updated as Transaction : tx));
+      loadData(); // Sync account balances from DB triggers
     } catch (err) {
       console.error('Failed to update transaction:', err);
       setTransactions(prev => prev.map(tx => tx.id === updatedTx.id ? updatedTx : tx));
     }
     setEditingTransaction(null);
+  };
+
+  const handleDeleteTransaction = async (id: string) => {
+    try {
+      await apiDeleteTransaction(id);
+      setTransactions(prev => prev.filter(tx => tx.id !== id));
+      loadData(); // Sync account balances from DB triggers
+    } catch (err) {
+      console.error('Failed to delete transaction:', err);
+    }
+    setEditingTransaction(null);
+  };
+
+  const handleDeleteAccount = async (id: string) => {
+    try {
+      await apiDeleteAccount(id);
+      setAccounts(prev => prev.filter(acc => acc.id !== id));
+      loadData(); // Sync all data
+    } catch (err) {
+      console.error('Failed to delete account:', err);
+    }
+    setEditingAccount(null);
   };
 
   const handleUpdateProfile = async (updatedUser: UserProfile) => {
@@ -274,6 +299,7 @@ export default function App() {
             }}
             accounts={accounts}
             onAdd={editingTransaction ? handleUpdateTransaction : handleAddTransaction}
+            onDelete={editingTransaction ? () => handleDeleteTransaction(editingTransaction.id) : undefined}
             initialData={editingTransaction || undefined}
           />
         )}
@@ -289,6 +315,7 @@ export default function App() {
           <AddAccountModal
             language={language}
             onSave={editingAccount ? handleUpdateAccount : handleAddAccount}
+            onDelete={editingAccount ? () => handleDeleteAccount(editingAccount.id) : undefined}
             onClose={() => {
               setShowAddAccount(false);
               setEditingAccount(null);

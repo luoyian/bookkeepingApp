@@ -129,3 +129,52 @@ DROP TRIGGER IF EXISTS on_auth_user_created ON auth.users;
 CREATE TRIGGER on_auth_user_created
   AFTER INSERT ON auth.users
   FOR EACH ROW EXECUTE FUNCTION public.handle_new_user();
+
+-- =============================================================
+-- 触发器: 同步交易记录到账户余额
+-- =============================================================
+
+CREATE OR REPLACE FUNCTION public.handle_transaction_change()
+RETURNS TRIGGER AS $$
+BEGIN
+  IF TG_OP = 'INSERT' THEN
+    -- 新增记录: 支出减余额，收入加余额
+    IF NEW.type = 'expense' THEN
+      UPDATE public.accounts SET balance = balance - NEW.amount WHERE user_id = NEW.user_id AND (name = NEW.account OR name_en = NEW.account);
+    ELSIF NEW.type = 'income' THEN
+      UPDATE public.accounts SET balance = balance + NEW.amount WHERE user_id = NEW.user_id AND (name = NEW.account OR name_en = NEW.account);
+    END IF;
+    RETURN NEW;
+  ELSIF TG_OP = 'DELETE' THEN
+    -- 删除记录: 反向操作
+    IF OLD.type = 'expense' THEN
+      UPDATE public.accounts SET balance = balance + OLD.amount WHERE user_id = OLD.user_id AND (name = OLD.account OR name_en = OLD.account);
+    ELSIF OLD.type = 'income' THEN
+      UPDATE public.accounts SET balance = balance - OLD.amount WHERE user_id = OLD.user_id AND (name = OLD.account OR name_en = OLD.account);
+    END IF;
+    RETURN OLD;
+  ELSIF TG_OP = 'UPDATE' THEN
+    -- 修改记录: 先撤销旧的，再应用新的
+    -- 1. 撤销旧的
+    IF OLD.type = 'expense' THEN
+      UPDATE public.accounts SET balance = balance + OLD.amount WHERE user_id = OLD.user_id AND (name = OLD.account OR name_en = OLD.account);
+    ELSIF OLD.type = 'income' THEN
+      UPDATE public.accounts SET balance = balance - OLD.amount WHERE user_id = OLD.user_id AND (name = OLD.account OR name_en = OLD.account);
+    END IF;
+    -- 2. 应用新的
+    IF NEW.type = 'expense' THEN
+      UPDATE public.accounts SET balance = balance - NEW.amount WHERE user_id = NEW.user_id AND (name = NEW.account OR name_en = NEW.account);
+    ELSIF NEW.type = 'income' THEN
+      UPDATE public.accounts SET balance = balance + NEW.amount WHERE user_id = NEW.user_id AND (name = NEW.account OR name_en = NEW.account);
+    END IF;
+    RETURN NEW;
+  END IF;
+  RETURN NULL;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+-- 绑定触发器到 transactions 表
+DROP TRIGGER IF EXISTS on_transaction_changed ON public.transactions;
+CREATE TRIGGER on_transaction_changed
+  AFTER INSERT OR UPDATE OR DELETE ON public.transactions
+  FOR EACH ROW EXECUTE FUNCTION public.handle_transaction_change();
