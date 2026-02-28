@@ -100,9 +100,7 @@ export const Assets: React.FC<AssetsProps> = ({
                   </p>
                 ) : acc.trend ? (
                   <p className="text-emerald-500 text-[10px] font-bold">+¥{acc.trend.toFixed(2)}</p>
-                ) : (
-                  <p className="text-slate-400 dark:text-slate-500 text-[10px] font-medium">{acc.status}</p>
-                )}
+                ) : null}
               </div>
             </div>
           ))}

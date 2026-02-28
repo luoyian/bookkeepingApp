@@ -13,7 +13,7 @@ interface AddAccountModalProps {
 
 export const AddAccountModal: React.FC<AddAccountModalProps> = ({ language, onSave, onDelete, onClose, initialData }) => {
   const [name, setName] = useState(initialData?.name || '');
-  const [nameEn, setNameEn] = useState(initialData?.nameEn || '');
+  const [description, setDescription] = useState(initialData?.description || '');
   const [balance, setBalance] = useState(initialData?.balance.toString() || '');
   const [icon, setIcon] = useState(initialData?.icon || 'account_balance_wallet');
   const [color, setColor] = useState(initialData?.color || '#137fec');
@@ -39,12 +39,12 @@ export const AddAccountModal: React.FC<AddAccountModalProps> = ({ language, onSa
     const account: Account = {
       id: initialData?.id || Math.random().toString(36).substr(2, 9),
       name,
-      nameEn: nameEn || name,
+      nameEn: name,
       type: initialData?.type || 'Custom',
       balance: parseFloat(balance) || 0,
       icon,
       color,
-      description: initialData?.description || (language === 'zh' ? '自定义账户' : 'Custom Account'),
+      description: description || (language === 'zh' ? '自定义账户' : 'Custom Account'),
       status: initialData?.status || 'Active'
     };
     onSave(account);
@@ -80,24 +80,24 @@ export const AddAccountModal: React.FC<AddAccountModalProps> = ({ language, onSa
 
         <div className="p-6 space-y-4 max-h-[70vh] overflow-y-auto no-scrollbar">
           <div className="space-y-2">
-            <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">{t('name', language)} (ZH)</label>
+            <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">{language === 'zh' ? '账户名称' : 'Account Name'}</label>
             <input
               type="text"
               value={name}
               onChange={(e) => setName(e.target.value)}
               className="w-full bg-slate-50 dark:bg-slate-800 border-none rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-primary/20"
-              placeholder="例如: 招商银行"
+              placeholder={language === 'zh' ? '例如: 招商银行, 支付宝' : 'e.g. CMB Bank'}
             />
           </div>
 
           <div className="space-y-2">
-            <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">{t('name', language)} (EN)</label>
+            <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">{language === 'zh' ? '账户类型' : 'Account Type'}</label>
             <input
               type="text"
-              value={nameEn}
-              onChange={(e) => setNameEn(e.target.value)}
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
               className="w-full bg-slate-50 dark:bg-slate-800 border-none rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-primary/20"
-              placeholder="e.g. CMB Bank"
+              placeholder={language === 'zh' ? '例如: 储蓄卡, 零钱' : 'e.g. Debit Card'}
             />
           </div>
 
